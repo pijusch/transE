@@ -1,4 +1,5 @@
 #coding:utf-8
+#from __future__ import division
 import pandas as pd
 import numpy as np
 import tensorflow as tf
@@ -8,11 +9,10 @@ import datetime
 import ctypes
 
 ll = ctypes.cdll.LoadLibrary   
-lib = ll("./init_train.so")
+lib = ll("./init_test.so")
 #sameAslib = ll("./init_train_sl.so")
 
 #exp_data_load = 'fbplusdb_200'
-exp_data = 'justfb'
 
 class Config(object):
 
@@ -86,7 +86,6 @@ def main(_):
 			saver = tf.train.Saver()
 			sess.run(tf.global_variables_initializer())
 			#saver.restore(sess,'models/'+exp_data_load+'/model.vec')
-                        print "Model Loaded!"
 
 
 			def train_step(pos_h_batch, pos_t_batch, pos_r_batch, neg_h_batch, neg_t_batch, neg_r_batch):
@@ -128,7 +127,7 @@ def main(_):
 					current_step = tf.train.global_step(sess, global_step)
 					#sameAslib.getBatch(ph_addr, pt_addr, pr_addr, nh_addr, nt_addr, nr_addr, config.batch_size_sameAs)
 					#res += train_step(ph, pt, pr, nh, nt, nr)
-					current_step = tf.train.global_step(sess, global_step)
+					#current_step = tf.train.global_step(sess, global_step)
 				print times
 				print res
 			saver.save(sess,'./model.vec')

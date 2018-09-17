@@ -8,7 +8,7 @@
 
 using namespace std;
 
-string inPath = "./justfb/";
+string inPath = "./fbonly/";
 
 int *lefHead, *rigHead;
 int *lefTail, *rigTail;
