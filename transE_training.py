@@ -9,7 +9,10 @@ import ctypes
 
 ll = ctypes.cdll.LoadLibrary   
 lib = ll("./init_train.so")
+#sameAslib = ll("./init_train_sl.so")
 
+#exp_data_load = 'fbplusdb_200'
+exp_data = 'justfb'
 
 class Config(object):
 
@@ -19,7 +22,7 @@ class Config(object):
 		self.nbatches = 100
 		self.entity = 0
 		self.relation = 0
-		self.trainTimes = 100
+		self.trainTimes = 50
 		self.margin = 1.0
 
 class TransEModel(object):
@@ -63,9 +66,11 @@ class TransEModel(object):
 def main(_):
 	lib.init()
 	config = Config()
+	#config=tf.ConfigProto(intra_op_parallelism_threads=10)
 	config.relation = lib.getRelationTotal()
 	config.entity = lib.getEntityTotal()
 	config.batch_size = lib.getTripleTotal() / config.nbatches
+	#config.batch_size_sameAs = sameAslib.getTripleTotal()/ config.nbatches
 
 	with tf.Graph().as_default():
 		sess = tf.Session()
@@ -75,11 +80,14 @@ def main(_):
 				trainModel = TransEModel(config = config)
 
 			global_step = tf.Variable(0, name="global_step", trainable=False)
-			optimizer = tf.train.GradientDescentOptimizer(0.001)
+			optimizer = tf.train.AdagradOptimizer(0.01)
 			grads_and_vars = optimizer.compute_gradients(trainModel.loss)
 			train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 			saver = tf.train.Saver()
 			sess.run(tf.global_variables_initializer())
+			#saver.restore(sess,'models/'+exp_data_load+'/model.vec')
+                        print "Model Loaded!"
+
 
 			def train_step(pos_h_batch, pos_t_batch, pos_r_batch, neg_h_batch, neg_t_batch, neg_r_batch):
 				feed_dict = {
@@ -110,17 +118,20 @@ def main(_):
 
               
 
-                        
+                        num_trainTimes = config.trainTimes
 	 		
-                        for times in range(config.trainTimes):
+                        for times in range(num_trainTimes):
 	 			res = 0.0
 				for batch in range(config.nbatches):
 					lib.getBatch(ph_addr, pt_addr, pr_addr, nh_addr, nt_addr, nr_addr, config.batch_size)
 					res += train_step(ph, pt, pr, nh, nt, nr)
 					current_step = tf.train.global_step(sess, global_step)
+					#sameAslib.getBatch(ph_addr, pt_addr, pr_addr, nh_addr, nt_addr, nr_addr, config.batch_size_sameAs)
+					#res += train_step(ph, pt, pr, nh, nt, nr)
+					current_step = tf.train.global_step(sess, global_step)
 				print times
 				print res
-			saver.save(sess, 'models/FB15k/model.vec')
+			saver.save(sess,'./model.vec')
                         
                  	
 

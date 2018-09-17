@@ -8,7 +8,7 @@
 
 using namespace std;
 
-string inPath = "./data/";
+string inPath = "./justfb/";
 
 int *lefHead, *rigHead;
 int *lefTail, *rigTail;
@@ -50,24 +50,20 @@ void init() {
 	FILE *fin;
 	int tmp;
 
-    relationTotal = 1345;
-    entityTotal = 14951;
-    tripleTotal = 483143;
 
-//	fin = fopen((inPath + "relation2id.txt").c_str(), "r");
-//	tmp = fscanf(fin, "%d", &relationTotal);
-//	fclose(fin);
+	fin = fopen((inPath + "relation.txt").c_str(), "r");
+	tmp = fscanf(fin, "%d", &relationTotal);
+	fclose(fin);
 
 	freqRel = (int *)calloc(relationTotal, sizeof(int));
 	
-//	fin = fopen((inPath + "entity2id.txt").c_str(), "r");
-//	tmp = fscanf(fin, "%d", &entityTotal);
-//	fclose(fin);
-
+	fin = fopen((inPath + "entity.txt").c_str(), "r");
+	tmp = fscanf(fin, "%d", &entityTotal);
+	fclose(fin);
 	freqEnt = (int *)calloc(entityTotal, sizeof(int));
 	
-	fin = fopen((inPath + "triple_train.txt").c_str(), "r");
-//	tmp = fscanf(fin, "%d", &tripleTotal);
+	fin = fopen((inPath + "train_triple.txt").c_str(), "r");
+	tmp = fscanf(fin, "%d", &tripleTotal);
 	trainHead = (Triple *)calloc(tripleTotal, sizeof(Triple));
 	trainTail = (Triple *)calloc(tripleTotal, sizeof(Triple));
 	trainList = (Triple *)calloc(tripleTotal, sizeof(Triple));

@@ -13,16 +13,19 @@ import ctypes
 ll = ctypes.cdll.LoadLibrary   
 lib = ll("./init_test.so")
 
+exp_data = 'fbplusdb'
+exp_data_load = 'fbplusdb_200'
+relation_num = 10 
 
 class Config(object):
 
 	def __init__(self):
 		self.L1_flag = True
-		self.hidden_size = 100
+		self.hidden_size = 100 
 		self.nbatches = 100
 		self.entity = 0
 		self.relation = 0
-		self.trainTimes = 100
+		self.trainTimes = 50
 		self.margin = 1.0
 
 class TransEModel(object):
@@ -72,6 +75,7 @@ def main(_):
 	config.relation = lib.getRelationTotal()
 	config.entity = lib.getEntityTotal()
 	config.batch_size = lib.getTripleTotal() / config.nbatches
+	relation_num = lib.getRelationTotal()
 
 	with tf.Graph().as_default():
 		sess = tf.Session()
@@ -128,31 +132,21 @@ def main(_):
 
 			loss=np.zeros((config.trainTimes,1))
 
-			saver.restore(sess,'models/FB15k/model.vec')
+			saver.restore(sess,'models/'+exp_data_load+'/model.vec')
 			print "Model Loaded!"
-			relation_array=np.array(range(0,1345,1))
-			test_data=pd.read_csv('./data/triple.txt',sep="\t",header=None)
+			relation_array=np.array(range(0,relation_num,1))
+			test_data=pd.read_csv('./data/'+exp_data+'/test_triple.txt',sep="\t",header=None)
 			hits1=0
 			hits5=0
 			hits10=0
 			for i in range(test_data.shape[0]):
 				e1=test_data.iloc[i][0]
 				e2=test_data.iloc[i][2]
-				r=test_data.iloc[i][1   ]
-				#Run a for loop for all the relations,get them into a single numpy array or list. Do that outisde here so it can be used
-				#multiple times inside. Probably just run a loop and keep on appending! 
-				results=predict(np.array([e1]*1345),np.array([e2]*1345),relation_array)
+				r=test_data.iloc[i][1 ]
+				results=predict(np.array([e1]*relation_num),np.array([e2]*relation_num),relation_array)
 				results_with_id=np.hstack((np.reshape(relation_array,[relation_array.shape[0],1]),results))
 				results_with_id=results_with_id[np.argsort(results_with_id[:,1])]
 				results_with_id=results_with_id[:,0]
-				# results_with_id=results_with_id[::-1]
-				# temp=results_with_id[:,1]
-				# temp=temp[::-1]
-				# temp=results_with_id[:,1]
-				# sigs=1.0/(1.0+np.exp(-1.0*temp))
-				# print temp
-				# print sigs[0:10]
-				# print results_with_id[0:100]
 				hit_1=results_with_id[0]
 				hit_5=results_with_id[0:5]
 				hit_10=results_with_id[0:10]
