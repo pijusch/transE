@@ -9,7 +9,7 @@ import datetime
 import ctypes
 
 ll = ctypes.cdll.LoadLibrary   
-lib = ll("./init_test.so")
+lib = ll("./init_train.so")
 #sameAslib = ll("./init_train_sl.so")
 
 #exp_data_load = 'fbplusdb_200'
